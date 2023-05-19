@@ -43,6 +43,10 @@ global without sharing class PublicHolidayInvocable {
             PublicHolidayBuilder builder = new PublicHolidayBuilder(response.getBody());
             List<Holiday> holidays = builder.build();
 
+            if (holidays == null || holidays.size() == null) {
+                return;
+            }
+
             Date currentMonthFisrtDay = Date.newInstance(dt.year(), dt.month(), 1);
             Date nextMonthFirstDay = currentMonthFisrtDay.addMonths(1);
 
