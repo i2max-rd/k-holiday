@@ -2,11 +2,20 @@
     "packageDirectories": [
         {
             "path": "force-app",
-            "default": true
+            "default": true,
+            "package": "K-Holiday",
+            "versionName": "ver 0.1",
+            "versionNumber": "0.1.0.NEXT",
+            "versionDescription": ""
         }
     ],
     "name": "k-holiday",
     "namespace": "kholiday",
     "sfdcLoginUrl": "https://login.salesforce.com",
-    "sourceApiVersion": "56.0"
+    "sourceApiVersion": "56.0",
+    "packageAliases": {
+        "K-Holiday": "0Ho5i000000fxjMCAQ",
+        "K-Holiday@0.1.0-1": "04t5i000000lqH0AAI",
+        "K-Holiday@0.1.0-2": "04t5i000000lqLDAAY"
+    }
 }
