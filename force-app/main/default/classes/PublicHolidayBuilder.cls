@@ -1,5 +1,8 @@
 @SuppressWarnings('PMD.AvoidGlobalModifier')
 global with sharing class PublicHolidayBuilder {
+    global class KHolidayException extends Exception {
+    }
+
     private List<PublicHolidayItemWrapper.Item> items;
 
     global PublicHolidayBuilder(String body) {
@@ -7,6 +10,10 @@ global with sharing class PublicHolidayBuilder {
     }
 
     global List<Holiday> build() {
+        if (items == null || items.size() == 0) {
+            return null;
+        }
+
         List<Holiday> holidays = new List<Holiday>();
 
         for (PublicHolidayItemWrapper.Item item : items) {
@@ -25,12 +32,17 @@ global with sharing class PublicHolidayBuilder {
             try {
                 PublicHolidayItemsWrapper itemsWrapper = PublicHolidayItemsWrapper.parse(body);
                 items.addAll(itemsWrapper.response.body.items.item);
-            } catch (Exception e) {
-                PublicHolidayItemWrapper itemWrapper = PublicHolidayItemWrapper.parse(body);
-                items.add(itemWrapper.response.body.items.item);
+            } catch (Exception e1) {
+                try {
+                    PublicHolidayItemWrapper itemWrapper = PublicHolidayItemWrapper.parse(body);
+                    items.add(itemWrapper.response.body.items.item);
+                } catch (Exception e2) {
+                    PublicHolidayNoResultWrapper noResultWrapper = PublicHolidayNoResultWrapper.parse(body);
+                    return null;
+                }
             }
         } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
+            throw new KHolidayException(e.getMessage());
         }
 
         return items;

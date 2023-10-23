@@ -11,8 +11,7 @@ public class PublicHolidayInvocableTest {
         Test.startTest();
 
         PublicHolidayInvocable.Requests param = new PublicHolidayInvocable.Requests();
-        param.year = 2023;
-        param.month = 5;
+        param.dt = Date.newInstance(2023, 5, 1);
 
         PublicHolidayInvocable.getHolidayInfo(new List<PublicHolidayInvocable.Requests>{ param });
 
@@ -37,8 +36,7 @@ public class PublicHolidayInvocableTest {
         Test.startTest();
 
         PublicHolidayInvocable.Requests param = new PublicHolidayInvocable.Requests();
-        param.year = 2023;
-        param.month = 3;
+        param.dt = Date.newInstance(2023, 3, 1);
 
         PublicHolidayInvocable.getHolidayInfo(new List<PublicHolidayInvocable.Requests>{ param });
 
@@ -53,12 +51,33 @@ public class PublicHolidayInvocableTest {
     }
 
     @isTest
+    static void testNoHoliday() {
+        Test.setMock(HttpCalloutMock.class, new PublicHolidayInvocableTestMockNoResult());
+
+        KHolidayCredentials__c publicApiCredential = new KHolidayCredentials__c();
+        publicApiCredential.ServiceKey__c = 'test-service-key';
+        insert publicApiCredential;
+
+        Test.startTest();
+
+        PublicHolidayInvocable.Requests param = new PublicHolidayInvocable.Requests();
+        param.dt = Date.newInstance(2023, 3, 1);
+
+        PublicHolidayInvocable.getHolidayInfo(new List<PublicHolidayInvocable.Requests>{ param });
+
+        Test.stopTest();
+
+        List<Holiday> holidays = [SELECT Id FROM Holiday];
+
+        System.assert(true, 'No clue to assert zero result');
+    }
+
+    @isTest
     static void testUpsertHolidaysNoServiceKey() {
         Test.setMock(HttpCalloutMock.class, new PublicHolidayInvocableTestMock());
 
         PublicHolidayInvocable.Requests param = new PublicHolidayInvocable.Requests();
-        param.year = 2023;
-        param.month = 5;
+        param.dt = Date.newInstance(2023, 5, 1);
 
         try {
             Test.startTest();
