@@ -30,13 +30,16 @@ global with sharing class PublicHolidayBuilder {
 
         try {
             try {
+                // * 해당 월에 복수의 공휴일
                 PublicHolidayItemsWrapper itemsWrapper = PublicHolidayItemsWrapper.parse(body);
                 items.addAll(itemsWrapper.response.body.items.item);
             } catch (Exception e1) {
                 try {
+                    // * 해당 월에 단수의 공휴일
                     PublicHolidayItemWrapper itemWrapper = PublicHolidayItemWrapper.parse(body);
                     items.add(itemWrapper.response.body.items.item);
                 } catch (Exception e2) {
+                    // * 해당 월에 공휴일 없음
                     PublicHolidayNoResultWrapper noResultWrapper = PublicHolidayNoResultWrapper.parse(body);
                     return null;
                 }

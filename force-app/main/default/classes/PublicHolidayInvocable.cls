@@ -40,8 +40,7 @@ global without sharing class PublicHolidayInvocable {
             Http h = new Http();
             HttpResponse response = h.send(request);
 
-            PublicHolidayBuilder builder = new PublicHolidayBuilder(response.getBody());
-            List<Holiday> holidays = builder.build();
+            List<Holiday> holidays = new PublicHolidayBuilder(response.getBody()).build();
 
             if (holidays == null || holidays.size() == null) {
                 return;
@@ -53,10 +52,10 @@ global without sharing class PublicHolidayInvocable {
             Set<String> nameSet = new Set<String>();
 
             for (Holiday h1 : [
-                SELECT Id, Name
+                SELECT Name
                 FROM Holiday
                 WHERE ActivityDate >= :currentMonthFisrtDay AND ActivityDate < :nextMonthFirstDay
-                WITH SECURITY_ENFORCED
+                WITH SYSTEM_MODE
             ]) {
                 nameSet.add(h1.Name);
             }
@@ -69,9 +68,7 @@ global without sharing class PublicHolidayInvocable {
                 }
             }
 
-            SObjectAccessDecision decision = Security.stripInaccessible(AccessType.CREATABLE, holidayToInsert);
-
-            insert decision.getRecords();
+            insert as system holidayToInsert;
         } catch (Exception e) {
             throw new KHolidayException(e.getMessage());
         }
