@@ -3,10 +3,11 @@ global with sharing class PublicHolidayBuilder {
     global class KHolidayException extends Exception {
     }
 
-    private List<PublicHolidayItemWrapper.Item> items;
+    private List<Item> items;
 
     global PublicHolidayBuilder(String body) {
-        this.items = extractItems(body);
+        //this.items = extractItems(body);
+        this.items = convertItems(body);
     }
 
     global List<Holiday> build() {
@@ -16,7 +17,7 @@ global with sharing class PublicHolidayBuilder {
 
         List<Holiday> holidays = new List<Holiday>();
 
-        for (PublicHolidayItemWrapper.Item item : items) {
+        for (Item item : items) {
             if (item.isHoliday == 'Y') {
                 holidays.add(new Holiday(Name = item.dateName, ActivityDate = integerToDate(item.locdate)));
             }
@@ -25,30 +26,34 @@ global with sharing class PublicHolidayBuilder {
         return holidays;
     }
 
-    private List<PublicHolidayItemWrapper.Item> extractItems(String body) {
-        List<PublicHolidayItemWrapper.Item> items = new List<PublicHolidayItemWrapper.Item>();
+    private List<Item> convertItems(String body) {
+        List<Item> result = new List<Item>();
 
-        try {
-            try {
-                // * 해당 월에 복수의 공휴일
-                PublicHolidayItemsWrapper itemsWrapper = PublicHolidayItemsWrapper.parse(body);
-                items.addAll(itemsWrapper.response.body.items.item);
-            } catch (Exception e1) {
-                try {
-                    // * 해당 월에 단수의 공휴일
-                    PublicHolidayItemWrapper itemWrapper = PublicHolidayItemWrapper.parse(body);
-                    items.add(itemWrapper.response.body.items.item);
-                } catch (Exception e2) {
-                    // * 해당 월에 공휴일 없음
-                    PublicHolidayNoResultWrapper noResultWrapper = PublicHolidayNoResultWrapper.parse(body);
-                    return null;
-                }
-            }
-        } catch (Exception e) {
-            throw new KHolidayException(e.getMessage());
+        Map<String, Object> jsonBody = (Map<String, Object>) JSON.deserializeUntyped(body);
+        Map<String, Object> response = (Map<String, Object>) jsonBody.get('response');
+        Map<String, Object> responseBody = (Map<String, Object>) response.get('body');
+
+        Integer totalCount = (Integer) responseBody.get('totalCount');
+
+        Map<String, Object> items;
+
+        if (totalCount >= 1) {
+            items = (Map<String, Object>) responseBody.get('items');
+        } else if (totalCount == 0) {
+            result = null;
+        } else {
+            throw new KHolidayException('Unresolvable holidays');
         }
 
-        return items;
+        if (totalCount == 1) {
+            // 단수의 휴일
+            result.add((Item) JSON.deserialize(JSON.serialize(items.get('item')), Item.class));
+        } else if (totalCount > 1) {
+            // 복수의 휴일
+            result = (List<Item>) JSON.deserialize(JSON.serialize(items.get('item')), List<Item>.class);
+        }
+
+        return result;
     }
 
     /**
@@ -63,5 +68,13 @@ global with sharing class PublicHolidayBuilder {
         String day = digits[6] + digits[7];
 
         return Date.valueOf(year + '-' + month + '-' + day);
+    }
+
+    public class Item {
+        public String dateKind;
+        public String dateName;
+        public String isHoliday;
+        public Integer locdate;
+        public Integer seq;
     }
 }

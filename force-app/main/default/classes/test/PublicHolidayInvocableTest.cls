@@ -1,6 +1,6 @@
-@isTest
+@Istest
 public class PublicHolidayInvocableTest {
-    @isTest
+    @Istest
     static void testUpsertHolidays() {
         Test.setMock(HttpCalloutMock.class, new PublicHolidayInvocableTestMock());
 
@@ -25,7 +25,7 @@ public class PublicHolidayInvocableTest {
         System.assertNotEquals(0, holidays.size(), 'Zero result');
     }
 
-    @isTest
+    @Istest
     static void testUpsertHoliday() {
         Test.setMock(HttpCalloutMock.class, new PublicHolidayInvocableTestMockSingle());
 
@@ -50,7 +50,7 @@ public class PublicHolidayInvocableTest {
         System.assertNotEquals(0, holidays.size(), 'Zero result');
     }
 
-    @isTest
+    @Istest
     static void testNoHoliday() {
         Test.setMock(HttpCalloutMock.class, new PublicHolidayInvocableTestMockNoResult());
 
@@ -72,7 +72,7 @@ public class PublicHolidayInvocableTest {
         System.assert(true, 'No clue to assert zero result');
     }
 
-    @isTest
+    @Istest
     static void testUpsertHolidaysNoServiceKey() {
         Test.setMock(HttpCalloutMock.class, new PublicHolidayInvocableTestMock());
 
