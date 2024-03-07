@@ -49,21 +49,21 @@ global without sharing class PublicHolidayInvocable {
             Date currentMonthFisrtDay = Date.newInstance(dt.year(), dt.month(), 1);
             Date nextMonthFirstDay = currentMonthFisrtDay.addMonths(1);
 
-            Set<String> nameSet = new Set<String>();
+            Set<String> nameDtSet = new Set<String>();
 
             for (Holiday h1 : [
-                SELECT Name
+                SELECT Name, ActivityDate
                 FROM Holiday
                 WHERE ActivityDate >= :currentMonthFisrtDay AND ActivityDate < :nextMonthFirstDay
                 WITH SYSTEM_MODE
             ]) {
-                nameSet.add(h1.Name);
+                nameDtSet.add(h1.Name + h1.ActivityDate);
             }
 
             List<Holiday> holidayToInsert = new List<Holiday>();
 
             for (Holiday h2 : holidays) {
-                if (!nameSet.contains(h2.Name)) {
+                if (!nameDtSet.contains(h2.Name + h2.ActivityDate)) {
                     holidayToInsert.add(h2);
                 }
             }
